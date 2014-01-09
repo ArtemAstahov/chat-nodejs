@@ -21,6 +21,11 @@ h1 {
     margin: 0px;
 }
 
+h5 {
+    color: #6E6E6E;
+    font-weight: bold;
+}
+
 p {
     font: 13px Open Sans;
     color: #6E6E6E;
@@ -105,6 +110,10 @@ input[type="submit"]:hover {
     font-weight: normal;
 }
 
+.messages {
+    padding-bottom: 50px;
+}
+
 /* Media
 ================================================== */
 
@@ -160,7 +169,6 @@ ul {
 /* Primary */
 
 .media-primary {
-    border-bottom: 1px solid #d4d4d4;
     margin-top: 30px;
 }
 .media-primary .media {

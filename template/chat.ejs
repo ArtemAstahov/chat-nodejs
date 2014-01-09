@@ -7,8 +7,8 @@
     <ul></ul>
 </div>
 <div id="room">
-    <ul class="messages">
-        <%=messages%>
+    <ul class="messages media-primary">
+
     </ul>
     <form>
         <input class="form-control" autocomplete="off" autofocus placeholder="message..">
@@ -34,7 +34,7 @@
         </li>
     </ul>
 </div>
-
+<div class="send btn">post</div>
 <script>
 
     if (!Array.prototype.forEach) {
@@ -59,7 +59,7 @@
 
     socket
         .on('message', function(username, message) {
-            printMessage(username + "> " +message);
+            printMessage(message, username);
         })
         .on('login', function(username) {
             user = username;
@@ -107,7 +107,7 @@
     function sendMessage() {
         var text = input.val();
         socket.emit('message', text, function() {
-            printMessage(user + "> " + text);
+            printMessage(text, user);
         });
 
         input.val('');
@@ -125,8 +125,40 @@
         $('<li>').append($('<i>').text(status)).appendTo(ul);
     }
 
-    function printMessage(text) {
-        $('<li>').text(text).appendTo(ul);
+    function printMessage(text, user) {
+        var mediaBody = $('<div>', {
+            'class': 'media-body'
+        });
+
+        var username = $('<h5>').text(user).appendTo(mediaBody);
+        var text = $('<p>').text(text).appendTo(mediaBody);
+
+        var box = $('<li>', {
+            'class': 'media col-gutters pad-top'
+        });
+
+        var a = $('<a>', {
+            'class': 'media-object',
+            'href': '#'
+        });
+        var img = $('<img>', {
+            'src': '/images/tracy.jpg'
+        });
+
+        img.appendTo(a);
+        box.append(a).append(mediaBody).appendTo(ul);
+
+
+
+//        <li class="media col-gutters pad-top">
+//                <a class="media-object" href="#">
+//                    <img src="/images/tracy.jpg" alt="Tracy">
+//                </a>
+//                <div class="media-body">
+//                        <h5>Tracy <span class="text-subtle h-promo">posted 4 days ago</span></h5>
+//                        <p>Your first impulse should be to play, we learn faster through play.</p>
+//                </div>
+//        </li>
     }
 
     function addUser(users) {
@@ -135,5 +167,17 @@
         }
 
     }
+
+    $('.send').on('click', function() {
+        $.ajax({
+            url: "/chat",
+            method: "POST",
+            statusCode: {
+                200: function(data) {
+                    console.log(data);
+                }
+            }
+        });
+    });
 
 </script>
