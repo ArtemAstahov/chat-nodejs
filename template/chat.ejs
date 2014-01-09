@@ -1,0 +1,139 @@
+<% layout('layout/page') -%>
+<% block('title', "Чат") -%>
+
+<script src="/vendor/bower_components/socket.io-client/dist/socket.io.js"></script>
+
+<div id="users">
+    <ul></ul>
+</div>
+<div id="room">
+    <ul class="messages">
+        <%=messages%>
+    </ul>
+    <form>
+        <input class="form-control" autocomplete="off" autofocus placeholder="message..">
+    </form>
+    <ul class="media-primary">
+        <li class="media col-gutters pad-top">
+            <a class="media-object" href="#">
+                <img src="/images/tracy.jpg" alt="Tracy">
+            </a>
+            <div class="media-body">
+                <h5>Tracy <span class="text-subtle h-promo">posted 4 days ago</span></h5>
+                <p>Your first impulse should be to play, we learn faster through play.</p>
+            </div>
+        </li>
+        <li class="media col-gutters pad-top">
+            <a class="media-object" href="#">
+                <img src="/images/tracy.jpg" alt="Tracy">
+            </a>
+            <div class="media-body">
+                <h5>Tracy <span class="text-subtle h-promo">posted 4 days ago</span></h5>
+                <p>Your first impulse should be to play, we learn faster through play.</p>
+            </div>
+        </li>
+    </ul>
+</div>
+
+<script>
+
+    if (!Array.prototype.forEach) {
+        Array.prototype.forEach = function (fn, scope) {
+            "use strict";
+            var i, len = this.length;
+            for (i = 0; i < len; i += 1) {
+                fn.call(scope, this[i], i, this);
+            }
+        };
+    }
+
+    var user = 'anonumous';
+    var form = $('#room form');
+    var ul = $('#room ul.messages');
+    var input = $('#room input');
+    var userBox = $('#users ul');
+
+    var socket = io.connect('', {
+        reconnect: false
+    });
+
+    socket
+        .on('message', function(username, message) {
+            printMessage(username + "> " +message);
+        })
+        .on('login', function(username) {
+            user = username;
+            addUser(username);
+            //console.log(username);
+        })
+        .on('leave', function(username) {
+            printStatus(username + " leave from the chat");
+        })
+        .on('join', function(username) {
+            printStatus(username + " join to the chat");
+            //addUser(username);
+        })
+        .on('connect', function() {
+            printStatus('connection successful');
+            form.on('submit', sendMessage);
+            input.prop('disabled', false);
+        })
+        .on('disconnect', function() {
+            printStatus('connection lose');
+            form.off('submit', sendMessage);
+            input.prop('disabled', true);
+            setTimeout(reconnect, 500);
+        })
+        .on('logout', function() {
+            location.href = "/";
+        })
+        .on('addUser', function(users) {
+            addUser(users);
+        })
+//        .on('loadMessages', function(messages) {
+//                console.log(messages);
+//                printMessage(message);
+//        })
+        .on('error', function(reason) {
+            if(reason == "handshake unauthorized") {
+                printStatus("you leave from the chat");
+            } else {
+                setTimeout(function() {
+                    socket.socket.connect();
+                }, 500);
+            }
+        });
+
+    function sendMessage() {
+        var text = input.val();
+        socket.emit('message', text, function() {
+            printMessage(user + "> " + text);
+        });
+
+        input.val('');
+        return false;
+    }
+
+    function reconnect() {
+        socket.once('error', function() {
+            setTimeout(reconnect, 500);
+        });
+        socket.socket.connect();
+    }
+
+    function printStatus(status) {
+        $('<li>').append($('<i>').text(status)).appendTo(ul);
+    }
+
+    function printMessage(text) {
+        $('<li>').text(text).appendTo(ul);
+    }
+
+    function addUser(users) {
+        for(var i = 0; i < users.length; i += 1) {
+            $('<li>').text(users[i].username).appendTo(userBox);
+        }
+
+    }
+
+</script>
