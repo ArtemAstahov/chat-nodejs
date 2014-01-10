@@ -21,9 +21,7 @@ if (app.get('env') == 'development') {
 }
 
 app.use(express.bodyParser({
-    keepExtensions: true,
-    uploadDir: __dirname + '/uploads',
-    limit: '200mb'
+    keepExtensions: true
 }));
 
 app.use(express.methodOverride());

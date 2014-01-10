@@ -7,32 +7,14 @@
     <ul></ul>
 </div>
 <div id="room">
-    <ul class="messages media-primary">
+    <div class="chat-wrapper">
+        <ul class="messages media-primary">
 
-    </ul>
+        </ul>
+    </div>
     <form>
         <input class="form-control" autocomplete="off" autofocus placeholder="message..">
     </form>
-    <ul class="media-primary">
-        <li class="media col-gutters pad-top">
-            <a class="media-object" href="#">
-                <img src="/images/tracy.jpg" alt="Tracy">
-            </a>
-            <div class="media-body">
-                <h5>Tracy <span class="text-subtle h-promo">posted 4 days ago</span></h5>
-                <p>Your first impulse should be to play, we learn faster through play.</p>
-            </div>
-        </li>
-        <li class="media col-gutters pad-top">
-            <a class="media-object" href="#">
-                <img src="/images/tracy.jpg" alt="Tracy">
-            </a>
-            <div class="media-body">
-                <h5>Tracy <span class="text-subtle h-promo">posted 4 days ago</span></h5>
-                <p>Your first impulse should be to play, we learn faster through play.</p>
-            </div>
-        </li>
-    </ul>
 </div>
 <div class="send btn">post</div>
 <script>
@@ -47,7 +29,8 @@
         };
     }
 
-    var user = 'anonumous';
+    var user = '';
+    var pictureUrl = '';
     var form = $('#room form');
     var ul = $('#room ul.messages');
     var input = $('#room input');
@@ -58,20 +41,19 @@
     });
 
     socket
-        .on('message', function(username, message) {
-            printMessage(message, username);
+        .on('message', function(username, message, picture) {
+            printMessage(username, message, picture);
         })
-        .on('login', function(username) {
+        .on('login', function(username, picture) {
             user = username;
+            pictureUrl = picture;
             addUser(username);
-            //console.log(username);
         })
         .on('leave', function(username) {
             printStatus(username + " leave from the chat");
         })
         .on('join', function(username) {
             printStatus(username + " join to the chat");
-            //addUser(username);
         })
         .on('connect', function() {
             printStatus('connection successful');
@@ -90,10 +72,6 @@
         .on('addUser', function(users) {
             addUser(users);
         })
-//        .on('loadMessages', function(messages) {
-//                console.log(messages);
-//                printMessage(message);
-//        })
         .on('error', function(reason) {
             if(reason == "handshake unauthorized") {
                 printStatus("you leave from the chat");
@@ -107,7 +85,7 @@
     function sendMessage() {
         var text = input.val();
         socket.emit('message', text, function() {
-            printMessage(text, user);
+            printMessage(user, text);
         });
 
         input.val('');
@@ -125,7 +103,8 @@
         $('<li>').append($('<i>').text(status)).appendTo(ul);
     }
 
-    function printMessage(text, user) {
+    function printMessage(user, text, picture) {
+        console.log(picture);
         var mediaBody = $('<div>', {
             'class': 'media-body'
         });
@@ -142,23 +121,11 @@
             'href': '#'
         });
         var img = $('<img>', {
-            'src': '/images/tracy.jpg'
+            'src': picture
         });
 
         img.appendTo(a);
         box.append(a).append(mediaBody).appendTo(ul);
-
-
-
-//        <li class="media col-gutters pad-top">
-//                <a class="media-object" href="#">
-//                    <img src="/images/tracy.jpg" alt="Tracy">
-//                </a>
-//                <div class="media-body">
-//                        <h5>Tracy <span class="text-subtle h-promo">posted 4 days ago</span></h5>
-//                        <p>Your first impulse should be to play, we learn faster through play.</p>
-//                </div>
-//        </li>
     }
 
     function addUser(users) {

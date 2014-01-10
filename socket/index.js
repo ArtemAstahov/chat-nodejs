@@ -109,6 +109,8 @@ module.exports = function(server) {
     io.sockets.on('connection', function (socket) {
         var username = socket.handshake.user.get('username');
         var userId = socket.handshake.user.get('_id');
+        var picture = socket.handshake.user.get('picture');
+
         var clients = io.sockets.clients();
 
         var usersInfo = [];
@@ -120,19 +122,13 @@ module.exports = function(server) {
                 usersInfo.push(obj);
         });
 
-//        Message.find({}, function(err, messages){
-//            console.log(JSON.stringify(messages));
-//            socket.broadcast.emit('loadMessages', JSON.stringify(messages));
-//        });
-
-
         socket.broadcast.emit('addUser', usersInfo);
 
         socket.broadcast.emit('join', username);
-        socket.emit('login', username);
+        socket.emit('login', username, picture);
 
         socket.on('message', function(text, cb) {
-            socket.broadcast.emit('message', username, text);
+            socket.broadcast.emit('message', username, text, picture);
             Message.addMessage(userId, text);
             cb && cb();
         });

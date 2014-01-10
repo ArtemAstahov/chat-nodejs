@@ -164,7 +164,10 @@ ul {
 }
 
 
-
+.chat-wrapper {
+    height: 500px;
+    overflow-y: auto;
+}
 
 /* Primary */
 

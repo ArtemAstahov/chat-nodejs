@@ -22,6 +22,9 @@ var schema = new Schema({
   created: {
     type: Date,
     default: Date.now
+  },
+  picture: {
+      type: String
   }
 });
 
@@ -42,7 +45,7 @@ schema.methods.checkPassword = function(password) {
   return this.encryptPassword(password) === this.hashedPassword;
 };
 
-schema.statics.authorize = function(username, password, callback) {
+schema.statics.authorize = function(username, password, picture, callback) {
     var User = this;
 
     async.waterfall([
@@ -57,7 +60,7 @@ schema.statics.authorize = function(username, password, callback) {
                     callback(new AuthError("Пароль неверен"))
                 }
             } else {
-                var user = new User({username: username, password: password});
+                var user = new User({username: username, password: password, picture: picture});
                 user.save(function(err) {
                     if(err) return callback(err);
                     callback(null, user);
